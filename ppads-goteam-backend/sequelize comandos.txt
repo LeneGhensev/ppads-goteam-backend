@@ -1,0 +1,15 @@
+//Iniciar boiler-plate do sequelize
+npx sequelize-cli init
+
+//Criar modelo
+npx sequelize-cli model:create --name Clientes --attributes nome:string,data_nasc:dateonly,credito:float
+
+//cria commit do migrate e atualiza db
+npx sequelize-cli db:migrate 
+
+/cria seed de dados
+npx sequelize-cli seed:generate --name demo-pessoa
+
+//carrega todas as seeder
+npx sequelize-cli db:seed:all
+

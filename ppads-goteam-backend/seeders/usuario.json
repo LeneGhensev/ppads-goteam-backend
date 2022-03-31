@@ -1,0 +1,46 @@
+[
+  {
+    "nome": "João",
+    "avatar": "",
+    "username": "Joao123",
+    "email": "joao@gmail.com",
+    "data_de_nasci": "",
+    "senha": "Joao1234!",
+    "admin": false,
+    "estado": "SP",
+    "pais": "Brasil"
+  },
+  {
+    "nome": "Maria",
+    "avatar": "",
+    "username": "Maria123",
+    "email": "maria@gmail.com",
+    "data_de_nasc": "",
+    "senha": "Maria1234!",
+    "admin": false,
+    "estado": "SP",
+    "pais": "Brasil"
+  },
+  {
+    "nome": "Fabiana",
+    "avatar": "",
+    "username": "Fabi123",
+    "email": "fabi@gmail.com",
+    "data_de_nasc": "",
+    "senha": "Fabi1234!",
+    "admin": false,
+    "estado": "SP",
+    "pais": "Brasil"
+  },
+  {
+    "nome": "Lucas",
+    "avatar": "",
+    "username": "Lucas123",
+    "email": "lucas@gmail.com",
+    "data_de_nasc": "",
+    "senha": "Lucas1234!",
+    "admin": true,
+    "estado": "SP",
+    "pais": "Brasil"
+  }
+]

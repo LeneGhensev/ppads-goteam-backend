@@ -1,0 +1,26 @@
+[
+  {
+    "nome": "Zombie Road",
+    "url_acesso": "https://www.addictinggames.com/embed/html5-games/23872",
+    "url_video": "",
+    "descricao": "Zombie Road is a free endless driving game. The zombie apocalypse is here and you can't win. The only smart move is to hit the road and get out of town. Smash your way through hordes of shambling undead as they clog up the highways and try to stop anyone from escaping. But beware! You won't just be fighting off the zombies, you'll be fighting for space on the open road with your own fellow humans. That is right, this is the apocalypse and there are no sides. Your fellow citizens are just as anxious to get out of town as you and they're just as braindead and vicious as the zombies.",
+    "imagem_ilustrativa": "https://www.addictinggames.com/sites/default/files/styles/homepage_views_style/public/zombieroad.jpg",
+    "id_categoria": 4
+},
+{
+  "nome": "Battleships Armada",
+  "url_acesso": "https://www.addictinggames.com/embed/html5-games/24885",
+  "url_video": "",
+  "descricao": "Battleships Armada is a free battleship game.",
+  "imagem_ilustrativa": "https://www.addictinggames.com/sites/default/files/styles/homepage_views_style/public/battleshipsarmada.jpg",
+  "id_categoria": 1
+},
+{
+  "nome": "The Tower Defense",
+  "url_acesso": "https://www.addictinggames.com/embed/html5-games/24735",
+  "url_video": "",
+  "descricao": "Tower Defence is a free Tower Defence game. We all love towers, we all love defending things. Now with the new game  'Tower Defence' you can put your love of defense and towers together and defend a tower. How does one defend a tower? With a series of smaller towers that are armed with archers, magicians, orbs, lasers, and all sorts of black magick or catapult-based weaponry. The invasion is on and you have limited resources to buy and build yourself a series of small towers in order to defend the larger tower. You can choose what kind of tower and whether or not you want to upgrade it, sell it for pennies on the dollar, or replace it with a tower that does something completely different. All of the different towers have different strengths and weaknesses. Some deal heavy damage but take a long time to reload, some have a long-range but deal very little damage. Some are auto-fire but have a very limited range. It is a puzzle with no outcome. Except for the one you give it.",
+  "imagem_ilustrativa": "https://www.addictinggames.com/sites/default/files/styles/homepage_views_style/public/towerdefense.jpg",
+  "id_categoria": 1
+}
+]

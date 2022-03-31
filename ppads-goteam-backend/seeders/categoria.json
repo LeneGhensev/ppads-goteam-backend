@@ -1,0 +1,10 @@
+[
+  { "nome": "Strategy" },
+  { "nome": "Shooter" },
+  { "nome": "Puzzle" },
+  { "nome": "Arcade" },
+  { "nome": "Role Playing Game (RPG)" },
+  { "nome": "Sports" },
+  { "nome": "Action" },
+  { "nome": "Adventure" }
+]
