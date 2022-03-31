@@ -33,8 +33,16 @@ class GameController {
 
   static async createGame(req, res) {
     const game = req.body;
+    let tags = game.tags;
+    delete game.tags;
+
     try{
         const gameCreated = await database.game.create(game);
+        tags = tags.map(tag => {
+          tagObj = {nome: tag}
+          tagFindOrCreated = await
+        })
+
         return res.status(201).json(gameCreated);
         
     }catch(error){
