@@ -32,16 +32,28 @@ class GameController {
   }
 
   static async createGame(req, res) {
-    const game = req.body;
+    let game = req.body;
     let tags = game.tags;
     delete game.tags;
 
     try{
         const gameCreated = await database.game.create(game);
+
         tags = tags.map(tag => {
-          tagObj = {nome: tag}
-          tagFindOrCreated = await
+          const tagFindOrCreated = await database.tag.findOrCreate({where:{ nome: tag }});
+          console.log(tagFindOrCreated)
+          return tagFindOrCreated;
         })
+
+        tags.forEach(tag => {
+          game_tag = {
+            id_game: gameCreated.id,
+            id_tag: tag.id
+          }
+          await database.game_tag.findOrCreate({where:{ id_game: gameCreated.id, id_tag: tag.id}});
+        })
+
+        gameCreated.tags = tags;
 
         return res.status(201).json(gameCreated);
         
