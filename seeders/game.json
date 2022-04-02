@@ -22,5 +22,15 @@
   "descricao": "Tower Defence is a free Tower Defence game. We all love towers, we all love defending things. Now with the new game  'Tower Defence' you can put your love of defense and towers together and defend a tower. How does one defend a tower? With a series of smaller towers that are armed with archers, magicians, orbs, lasers, and all sorts of black magick or catapult-based weaponry. The invasion is on and you have limited resources to buy and build yourself a series of small towers in order to defend the larger tower. You can choose what kind of tower and whether or not you want to upgrade it, sell it for pennies on the dollar, or replace it with a tower that does something completely different. All of the different towers have different strengths and weaknesses. Some deal heavy damage but take a long time to reload, some have a long-range but deal very little damage. Some are auto-fire but have a very limited range. It is a puzzle with no outcome. Except for the one you give it.",
   "imagem_ilustrativa": "https://www.addictinggames.com/sites/default/files/styles/homepage_views_style/public/towerdefense.jpg",
   "id_categoria": 1
+},
+{
+  "nome": "Escape the Prison",
+  "url_acesso": "https://www.addictinggames.com/embed/flash-games/19649",
+  "url_video": "",
+  "descricao": "As with most adventure games, your goal is to literally click on everything and anything. If you pick anything up, you’ll need to use it—somehow, and if there’s anything you can interact with, then chances are you’ll have to use it somehow with an item. There are also a few clues that you’re going to have to find, and then remember, if you want to make it out of here quickly—and you can. Escape the Prison isn’t a long game. If you know what you’re doing, you can finish it really quickly. It’s a good thing escaping from real prison didn’t happen this fast!",
+  "imagem_ilustrativa": "https://www.addictinggames.com/sites/default/files/styles/homepage_views_style/public/escape-the-prison_sp.png",
+  "id_categoria": 2,
+  "tags": ["Ação", "Cooperativo", "Multijogador"]
 }
+
 ]

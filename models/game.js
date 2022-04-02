@@ -17,9 +17,10 @@ module.exports = (sequelize, DataTypes) => {
         as: 'categoria'
       })
       game.belongsToMany(models.tag, {
-        through: models.game_tag,
+        through: "GameTags",
+        as: 'tags',
         foreignKey: 'id_game',
-        constraints: true
+        constraints: true,
       })
     }
   }
@@ -28,7 +29,7 @@ module.exports = (sequelize, DataTypes) => {
       nome: DataTypes.STRING,
       url_acesso: DataTypes.STRING,
       url_video: DataTypes.STRING,
-      descricao: DataTypes.STRING,
+      descricao: DataTypes.TEXT,
       imagem_ilustrativa: DataTypes.STRING,
     },
     {
