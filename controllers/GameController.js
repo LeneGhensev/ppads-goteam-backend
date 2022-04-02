@@ -8,7 +8,7 @@ class GameController {
           { model: database.categoria, as: "categoria" },
           { model: database.tag, as: "tags" },
         ],
-        attributes: { exclude: ["id_categoria"] },
+        //attributes: { exclude: ["id_categoria"] },
       });
 
       return res.status(200).json(games);
@@ -27,7 +27,7 @@ class GameController {
           { model: database.categoria, as: "categoria" },
           { model: database.tag, as: "tags" },
         ],
-        attributes: { exclude: ["id_categoria"] },
+        //attributes: { exclude: ["id_categoria"] },
       });
       delete game.id_categoria;
       return res.status(200).json(game);
@@ -79,7 +79,9 @@ class GameController {
   static async updateGame(req, res) {
     const { id } = req.params;
     let game = req.body;
+    let tags = game.tags
     delete game.id;
+    delete game.tags;
     try {
       await database.game.update(game, { where: { id: Number(id) } });
       const gameUpdated = await database.game.findOne({
