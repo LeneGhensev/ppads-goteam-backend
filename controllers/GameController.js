@@ -1,4 +1,6 @@
 const database = require("../models");
+const s3Client = require("../service/s3Client");
+const formidable = require("formidable");
 
 class GameController {
   static async findAllGames(req, res) {
@@ -39,35 +41,52 @@ class GameController {
 
   static async createGame(req, res) {
     let game = req.body;
-
     let tags = game.tags;
+    const form = new formidable.IncomingForm();
+    var url;
+    var gameCreated;
 
     try {
-      tags = tags.map(async (tag) => {
-        tag = await database.tag.findOrCreate({
-          where: { nome: tag },
-          raw: true,
-        });
-        return tag[0];
-      });
+      form.parse(req, async (err, fields, files) => {
+        url = await s3Client.uploadFile(
+          files.imagem_ilustrativa.newFilename,
+          files.imagem_ilustrativa.filepath,
+          files.imagem_ilustrativa.mimetype
+        );
 
-      Promise.all(tags).then(async (tags) => {
-        console.log(tags);
+        game.imagem_ilustrativa = url;
 
-        let gameCreated = await database.game.create(game, { raw: true });
-
-        tags.forEach(async (tag) => {
-          try {
-            await database.GameTags.create({
-              id_game: gameCreated.id,
-              id_tag: tag.id,
+        if (tags) {
+          tags = tags.map(async (tag) => {
+            tag = await database.tag.findOrCreate({
+              where: { nome: tag },
+              raw: true,
             });
-          } catch (error) {
-            console.log(error);
-          }
-        });
+            return tag[0];
+          });
 
-        gameCreated.tags = tags;
+          Promise.all(tags).then(async (tags) => {
+            console.log(tags);
+
+            gameCreated = await database.game.create(game, { raw: true });
+
+            tags.forEach(async (tag) => {
+              try {
+                await database.GameTags.create({
+                  id_game: gameCreated.id,
+                  id_tag: tag.id,
+                });
+              } catch (error) {
+                console.log(error);
+              }
+            });
+
+            gameCreated.tags = tags;
+            return res.status(201).json(gameCreated);
+          });
+        }
+
+        gameCreated = await database.game.create(game, { raw: true });
         return res.status(201).json(gameCreated);
       });
     } catch (error) {
@@ -79,29 +98,41 @@ class GameController {
   static async updateGame(req, res) {
     const { id } = req.params;
     let game = req.body;
-    let tags = game.tags
+    let tags = game.tags;
     delete game.id;
     delete game.tags;
+    const form = new formidable.IncomingForm();
+    var url;
 
     try {
-      await database.GameTags.destroy({where:{ id_game: Number(id) }})
+      form.parse(req, async (err, fields, files) => {
+        url = await s3Client.uploadFile(
+          files.imagem_ilustrativa.newFilename,
+          files.imagem_ilustrativa.filepath,
+          files.imagem_ilustrativa.mimetype
+        );
 
-      tags.forEach(async (tag) => {
-        try {
-          await database.GameTags.create({
-            id_game: id,
-            id_tag: tag.id,
-          });
-        } catch (error) {
-          console.log(error);
-        }
-      });
+        game.imagem_ilustrativa = url;
 
-      await database.game.update(game, { where: { id: Number(id) } });
-      const gameUpdated = await database.game.findOne({
-        where: { id: Number(id) },
+        await database.GameTags.destroy({ where: { id_game: Number(id) } });
+
+        tags.forEach(async (tag) => {
+          try {
+            await database.GameTags.create({
+              id_game: id,
+              id_tag: tag.id,
+            });
+          } catch (error) {
+            console.log(error);
+          }
+        });
+
+        await database.game.update(game, { where: { id: Number(id) } });
+        const gameUpdated = await database.game.findOne({
+          where: { id: Number(id) },
+        });
+        return res.status(202).json(gameUpdated);
       });
-      return res.status(202).json(gameUpdated);
     } catch (error) {
       console.log(error);
       return res.status(500).json(error.message);
