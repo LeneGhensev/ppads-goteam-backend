@@ -82,7 +82,21 @@ class GameController {
     let tags = game.tags
     delete game.id;
     delete game.tags;
+
     try {
+      await database.GameTags.destroy({where:{ id_game: Number(id) }})
+
+      tags.forEach(async (tag) => {
+        try {
+          await database.GameTags.create({
+            id_game: id,
+            id_tag: tag.id,
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      });
+
       await database.game.update(game, { where: { id: Number(id) } });
       const gameUpdated = await database.game.findOne({
         where: { id: Number(id) },
