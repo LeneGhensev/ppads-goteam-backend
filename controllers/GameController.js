@@ -40,23 +40,24 @@ class GameController {
   }
 
   static async createGame(req, res) {
-    let game = req.body;
-    let tags = game.tags;
     const form = new formidable.IncomingForm();
     var url;
     var gameCreated;
 
     try {
       form.parse(req, async (err, fields, files) => {
+        let game = fields;
+        let tags = game.tags;
+
         url = await s3Client.uploadFile(
           files.imagem_ilustrativa.newFilename,
           files.imagem_ilustrativa.filepath,
           files.imagem_ilustrativa.mimetype
         );
-
         game.imagem_ilustrativa = url;
-
+        
         if (tags) {
+          tags = JSON.parse(tags);
           tags = tags.map(async (tag) => {
             tag = await database.tag.findOrCreate({
               where: { nome: tag },
@@ -66,8 +67,6 @@ class GameController {
           });
 
           Promise.all(tags).then(async (tags) => {
-            console.log(tags);
-
             gameCreated = await database.game.create(game, { raw: true });
 
             tags.forEach(async (tag) => {
@@ -84,10 +83,10 @@ class GameController {
             gameCreated.tags = tags;
             return res.status(201).json(gameCreated);
           });
+        } else {
+          gameCreated = await database.game.create(game, { raw: true });
+          return res.status(201).json(gameCreated);
         }
-
-        gameCreated = await database.game.create(game, { raw: true });
-        return res.status(201).json(gameCreated);
       });
     } catch (error) {
       console.log(error);
