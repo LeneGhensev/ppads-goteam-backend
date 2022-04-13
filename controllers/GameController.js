@@ -23,7 +23,7 @@ class GameController {
   static async findOneGame(req, res) {
     const { id } = req.params;
     try {
-      const game = await database.game.findOne({
+      let game = await database.game.findOne({
         where: { id: Number(id) },
         include: [
           { model: database.categoria, as: "categoria" },
@@ -31,7 +31,7 @@ class GameController {
         ],
         //attributes: { exclude: ["id_categoria"] },
       });
-      delete game.id_categoria;
+
       return res.status(200).json(game);
     } catch (error) {
       console.log(error);
@@ -43,55 +43,98 @@ class GameController {
     const form = new formidable.IncomingForm();
     var url;
     var gameCreated;
+    var game = req.body;
 
-    try {
-      form.parse(req, async (err, fields, files) => {
-        let game = fields;
-        let tags = game.tags;
-
-        url = await s3Client.uploadFile(
-          files.imagem_ilustrativa.newFilename,
-          files.imagem_ilustrativa.filepath,
-          files.imagem_ilustrativa.mimetype
-        );
-        game.imagem_ilustrativa = url;
-        
-        if (tags) {
-          tags = JSON.parse(tags);
-          tags = tags.map(async (tag) => {
-            tag = await database.tag.findOrCreate({
-              where: { nome: tag },
-              raw: true,
+    if(req.is('multipart/form-data')){
+      try {
+        form.parse(req, async (err, fields, files) => {
+          
+          game = fields;
+  
+          var tags = game.tags;
+  
+          if (files.imagem_ilustrativa) {
+            url = await s3Client.uploadFile(
+              files.imagem_ilustrativa.newFilename,
+              files.imagem_ilustrativa.filepath,
+              files.imagem_ilustrativa.mimetype
+            );
+            game.imagem_ilustrativa = url;
+          }
+  
+          if (tags) {
+            tags = JSON.parse(tags);
+            tags = tags.map(async (tag) => {
+              tag = await database.tag.findOrCreate({
+                where: { nome: tag },
+                raw: true,
+              });
+              return tag[0];
             });
-            return tag[0];
-          });
-
-          Promise.all(tags).then(async (tags) => {
+  
+            Promise.all(tags).then(async (tags) => {
+              gameCreated = await database.game.create(game, { raw: true });
+  
+              tags.forEach(async (tag) => {
+                try {
+                  await database.GameTags.create({
+                    id_game: gameCreated.id,
+                    id_tag: tag.id,
+                  });
+                } catch (error) {
+                  console.log(error);
+                }
+              });
+  
+              gameCreated.tags = tags;
+              return res.status(201).json(gameCreated);
+            });
+          } else {
             gameCreated = await database.game.create(game, { raw: true });
-
-            tags.forEach(async (tag) => {
-              try {
-                await database.GameTags.create({
-                  id_game: gameCreated.id,
-                  id_tag: tag.id,
-                });
-              } catch (error) {
-                console.log(error);
-              }
-            });
-
-            gameCreated.tags = tags;
             return res.status(201).json(gameCreated);
+          }
+        });
+      } catch (error) {
+        console.log(error);
+        return res.status(500).json(error.message);
+      }
+    } else {
+      var tags = game.tags;
+
+      if (tags) {
+        //tags = JSON.parse(tags);
+        tags = tags.map(async (tag) => {
+          tag = await database.tag.findOrCreate({
+            where: { nome: tag },
+            raw: true,
           });
-        } else {
+          return tag[0];
+        });
+
+        Promise.all(tags).then(async (tags) => {
           gameCreated = await database.game.create(game, { raw: true });
+
+          tags.forEach(async (tag) => {
+            try {
+              await database.GameTags.create({
+                id_game: gameCreated.id,
+                id_tag: tag.id,
+              });
+            } catch (error) {
+              console.log(error);
+            }
+          });
+
+          gameCreated.tags = tags;
           return res.status(201).json(gameCreated);
-        }
-      });
-    } catch (error) {
-      console.log(error);
-      return res.status(500).json(error.message);
+        });
+      } else {
+        gameCreated = await database.game.create(game, { raw: true });
+        return res.status(201).json(gameCreated);
+      }
+        
     }
+
   }
 
   static async updateGame(req, res) {
