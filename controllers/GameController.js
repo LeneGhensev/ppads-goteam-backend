@@ -23,7 +23,7 @@ class GameController {
   static async findOneGame(req, res) {
     const { id } = req.params;
     try {
-      const game = await database.game.findOne({
+      let game = await database.game.findOne({
         where: { id: Number(id) },
         include: [
           { model: database.categoria, as: "categoria" },
@@ -31,7 +31,7 @@ class GameController {
         ],
         //attributes: { exclude: ["id_categoria"] },
       });
-      delete game.id_categoria;
+
       return res.status(200).json(game);
     } catch (error) {
       console.log(error);
@@ -43,54 +43,94 @@ class GameController {
     const form = new formidable.IncomingForm();
     var url;
     var gameCreated;
+    var game = req.body;
 
-    try {
-      form.parse(req, async (err, fields, files) => {
-        let game = fields;
-        let tags = game.tags;
+    if (req.is("multipart/form-data")) {
+      try {
+        form.parse(req, async (err, fields, files) => {
+          game = fields;
 
-        url = await s3Client.uploadFile(
-          files.imagem_ilustrativa.newFilename,
-          files.imagem_ilustrativa.filepath,
-          files.imagem_ilustrativa.mimetype
-        );
-        game.imagem_ilustrativa = url;
-        
-        if (tags) {
-          tags = JSON.parse(tags);
-          tags = tags.map(async (tag) => {
-            tag = await database.tag.findOrCreate({
-              where: { nome: tag },
-              raw: true,
+          var tags = game.tags;
+
+          if (files.imagem_ilustrativa) {
+            url = await s3Client.uploadFile(
+              files.imagem_ilustrativa.newFilename,
+              files.imagem_ilustrativa.filepath,
+              files.imagem_ilustrativa.mimetype
+            );
+            game.imagem_ilustrativa = url;
+          }
+
+          if (tags) {
+            tags = JSON.parse(tags);
+            tags = tags.map(async (tag) => {
+              tag = await database.tag.findOrCreate({
+                where: { nome: tag },
+                raw: true,
+              });
+              return tag[0];
             });
-            return tag[0];
-          });
 
-          Promise.all(tags).then(async (tags) => {
+            Promise.all(tags).then(async (tags) => {
+              gameCreated = await database.game.create(game, { raw: true });
+
+              tags.forEach(async (tag) => {
+                try {
+                  await database.GameTags.create({
+                    id_game: gameCreated.id,
+                    id_tag: tag.id,
+                  });
+                } catch (error) {
+                  console.log(error);
+                }
+              });
+
+              gameCreated.tags = tags;
+              return res.status(201).json(gameCreated);
+            });
+          } else {
             gameCreated = await database.game.create(game, { raw: true });
-
-            tags.forEach(async (tag) => {
-              try {
-                await database.GameTags.create({
-                  id_game: gameCreated.id,
-                  id_tag: tag.id,
-                });
-              } catch (error) {
-                console.log(error);
-              }
-            });
-
-            gameCreated.tags = tags;
             return res.status(201).json(gameCreated);
+          }
+        });
+      } catch (error) {
+        console.log(error);
+        return res.status(500).json(error.message);
+      }
+    } else {
+      var tags = game.tags;
+
+      if (tags) {
+        tags = JSON.parse(tags);
+        tags = tags.map(async (tag) => {
+          tag = await database.tag.findOrCreate({
+            where: { nome: tag },
+            raw: true,
           });
-        } else {
+          return tag[0];
+        });
+
+        Promise.all(tags).then(async (tags) => {
           gameCreated = await database.game.create(game, { raw: true });
+
+          tags.forEach(async (tag) => {
+            try {
+              await database.GameTags.create({
+                id_game: gameCreated.id,
+                id_tag: tag.id,
+              });
+            } catch (error) {
+              console.log(error);
+            }
+          });
+
+          gameCreated.tags = tags;
           return res.status(201).json(gameCreated);
-        }
-      });
-    } catch (error) {
-      console.log(error);
-      return res.status(500).json(error.message);
+        });
+      } else {
+        gameCreated = await database.game.create(game, { raw: true });
+        return res.status(201).json(gameCreated);
+      }
     }
   }
 
@@ -103,38 +143,121 @@ class GameController {
     const form = new formidable.IncomingForm();
     var url;
 
-    try {
-      form.parse(req, async (err, fields, files) => {
-        url = await s3Client.uploadFile(
-          files.imagem_ilustrativa.newFilename,
-          files.imagem_ilustrativa.filepath,
-          files.imagem_ilustrativa.mimetype
-        );
+    if (req.is("multipart/form-data")) {
+      try {
+        form.parse(req, async (err, fields, files) => {
+          game = fields;
+          tags = game.tags;
 
-        game.imagem_ilustrativa = url;
+          delete game.id;
+          delete game.tags;
 
-        await database.GameTags.destroy({ where: { id_game: Number(id) } });
+          if (files.imagem_ilustrativa) {
+            url = await s3Client.uploadFile(
+              files.imagem_ilustrativa.newFilename,
+              files.imagem_ilustrativa.filepath,
+              files.imagem_ilustrativa.mimetype
+            );
 
-        tags.forEach(async (tag) => {
-          try {
-            await database.GameTags.create({
-              id_game: id,
-              id_tag: tag.id,
+            game.imagem_ilustrativa = url;
+          }
+
+          await database.GameTags.destroy({ where: { id_game: Number(id) } });
+
+          if (tags) {
+            tags = JSON.parse(tags);
+            tags = tags.map(async (tag) => {
+              tag = await database.tag.findOrCreate({
+                where: { nome: tag },
+                raw: true,
+              });
+              return tag[0];
             });
-          } catch (error) {
-            console.log(error);
+
+            Promise.all(tags).then(async (tags) => {
+              tags.forEach(async (tag) => {
+                try {
+                  await database.GameTags.create({
+                    id_game: id,
+                    id_tag: tag.id,
+                  });
+                } catch (error) {
+                  console.log(error);
+                }
+              });
+
+              await database.game.update(game, { where: { id: Number(id) } });
+              const gameUpdated = await database.game.findOne({
+                where: { id: Number(id) },
+                include: [
+                  { model: database.categoria, as: "categoria" },
+                  { model: database.tag, as: "tags" },
+                ],
+              });
+              return res.status(202).json(gameUpdated);
+            });
+          } else {
+            await database.game.update(game, { where: { id: Number(id) } });
+            const gameUpdated = await database.game.findOne({
+              where: { id: Number(id) },
+              include: [
+                { model: database.categoria, as: "categoria" },
+                { model: database.tag, as: "tags" },
+              ],
+            });
+            return res.status(202).json(gameUpdated);
           }
         });
+      } catch (error) {
+        console.log(error);
+        return res.status(500).json(error.message);
+      }
+    } else {
+      await database.GameTags.destroy({ where: { id_game: Number(id) } });
 
+      if (tags) {
+        tags = JSON.parse(tags);
+        tags = tags.map(async (tag) => {
+          tag = await database.tag.findOrCreate({
+            where: { nome: tag },
+            raw: true,
+          });
+          return tag[0];
+        });
+
+        Promise.all(tags).then(async (tags) => {
+          tags.forEach(async (tag) => {
+            try {
+              await database.GameTags.create({
+                id_game: id,
+                id_tag: tag.id,
+              });
+            } catch (error) {
+              console.log(error);
+            }
+          });
+
+          await database.game.update(game, { where: { id: Number(id) } });
+          const gameUpdated = await database.game.findOne({
+            where: { id: Number(id) },
+            include: [
+              { model: database.categoria, as: "categoria" },
+              { model: database.tag, as: "tags" },
+            ],
+          });
+          return res.status(202).json(gameUpdated);
+        });
+      } else {
         await database.game.update(game, { where: { id: Number(id) } });
         const gameUpdated = await database.game.findOne({
           where: { id: Number(id) },
+          include: [
+            { model: database.categoria, as: "categoria" },
+            { model: database.tag, as: "tags" },
+          ],
         });
         return res.status(202).json(gameUpdated);
-      });
-    } catch (error) {
-      console.log(error);
-      return res.status(500).json(error.message);
+      }
     }
   }
 
