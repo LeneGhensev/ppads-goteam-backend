@@ -45,14 +45,13 @@ class GameController {
     var gameCreated;
     var game = req.body;
 
-    if(req.is('multipart/form-data')){
+    if (req.is("multipart/form-data")) {
       try {
         form.parse(req, async (err, fields, files) => {
-          
           game = fields;
-  
+
           var tags = game.tags;
-  
+
           if (files.imagem_ilustrativa) {
             url = await s3Client.uploadFile(
               files.imagem_ilustrativa.newFilename,
@@ -61,7 +60,7 @@ class GameController {
             );
             game.imagem_ilustrativa = url;
           }
-  
+
           if (tags) {
             tags = JSON.parse(tags);
             tags = tags.map(async (tag) => {
@@ -71,10 +70,10 @@ class GameController {
               });
               return tag[0];
             });
-  
+
             Promise.all(tags).then(async (tags) => {
               gameCreated = await database.game.create(game, { raw: true });
-  
+
               tags.forEach(async (tag) => {
                 try {
                   await database.GameTags.create({
@@ -85,7 +84,7 @@ class GameController {
                   console.log(error);
                 }
               });
-  
+
               gameCreated.tags = tags;
               return res.status(201).json(gameCreated);
             });
@@ -102,7 +101,7 @@ class GameController {
       var tags = game.tags;
 
       if (tags) {
-        //tags = JSON.parse(tags);
+        tags = JSON.parse(tags);
         tags = tags.map(async (tag) => {
           tag = await database.tag.findOrCreate({
             where: { nome: tag },
@@ -132,9 +131,7 @@ class GameController {
         gameCreated = await database.game.create(game, { raw: true });
         return res.status(201).json(gameCreated);
       }
-        
     }
-
   }
 
   static async updateGame(req, res) {
@@ -146,38 +143,121 @@ class GameController {
     const form = new formidable.IncomingForm();
     var url;
 
-    try {
-      form.parse(req, async (err, fields, files) => {
-        url = await s3Client.uploadFile(
-          files.imagem_ilustrativa.newFilename,
-          files.imagem_ilustrativa.filepath,
-          files.imagem_ilustrativa.mimetype
-        );
+    if (req.is("multipart/form-data")) {
+      try {
+        form.parse(req, async (err, fields, files) => {
+          game = fields;
+          tags = game.tags;
 
-        game.imagem_ilustrativa = url;
+          delete game.id;
+          delete game.tags;
 
-        await database.GameTags.destroy({ where: { id_game: Number(id) } });
+          if (files.imagem_ilustrativa) {
+            url = await s3Client.uploadFile(
+              files.imagem_ilustrativa.newFilename,
+              files.imagem_ilustrativa.filepath,
+              files.imagem_ilustrativa.mimetype
+            );
 
-        tags.forEach(async (tag) => {
-          try {
-            await database.GameTags.create({
-              id_game: id,
-              id_tag: tag.id,
+            game.imagem_ilustrativa = url;
+          }
+
+          await database.GameTags.destroy({ where: { id_game: Number(id) } });
+
+          if (tags) {
+            tags = JSON.parse(tags);
+            tags = tags.map(async (tag) => {
+              tag = await database.tag.findOrCreate({
+                where: { nome: tag },
+                raw: true,
+              });
+              return tag[0];
             });
-          } catch (error) {
-            console.log(error);
+
+            Promise.all(tags).then(async (tags) => {
+              tags.forEach(async (tag) => {
+                try {
+                  await database.GameTags.create({
+                    id_game: id,
+                    id_tag: tag.id,
+                  });
+                } catch (error) {
+                  console.log(error);
+                }
+              });
+
+              await database.game.update(game, { where: { id: Number(id) } });
+              const gameUpdated = await database.game.findOne({
+                where: { id: Number(id) },
+                include: [
+                  { model: database.categoria, as: "categoria" },
+                  { model: database.tag, as: "tags" },
+                ],
+              });
+              return res.status(202).json(gameUpdated);
+            });
+          } else {
+            await database.game.update(game, { where: { id: Number(id) } });
+            const gameUpdated = await database.game.findOne({
+              where: { id: Number(id) },
+              include: [
+                { model: database.categoria, as: "categoria" },
+                { model: database.tag, as: "tags" },
+              ],
+            });
+            return res.status(202).json(gameUpdated);
           }
         });
+      } catch (error) {
+        console.log(error);
+        return res.status(500).json(error.message);
+      }
+    } else {
+      await database.GameTags.destroy({ where: { id_game: Number(id) } });
 
+      if (tags) {
+        tags = JSON.parse(tags);
+        tags = tags.map(async (tag) => {
+          tag = await database.tag.findOrCreate({
+            where: { nome: tag },
+            raw: true,
+          });
+          return tag[0];
+        });
+
+        Promise.all(tags).then(async (tags) => {
+          tags.forEach(async (tag) => {
+            try {
+              await database.GameTags.create({
+                id_game: id,
+                id_tag: tag.id,
+              });
+            } catch (error) {
+              console.log(error);
+            }
+          });
+
+          await database.game.update(game, { where: { id: Number(id) } });
+          const gameUpdated = await database.game.findOne({
+            where: { id: Number(id) },
+            include: [
+              { model: database.categoria, as: "categoria" },
+              { model: database.tag, as: "tags" },
+            ],
+          });
+          return res.status(202).json(gameUpdated);
+        });
+      } else {
         await database.game.update(game, { where: { id: Number(id) } });
         const gameUpdated = await database.game.findOne({
           where: { id: Number(id) },
+          include: [
+            { model: database.categoria, as: "categoria" },
+            { model: database.tag, as: "tags" },
+          ],
         });
         return res.status(202).json(gameUpdated);
-      });
-    } catch (error) {
-      console.log(error);
-      return res.status(500).json(error.message);
+      }
     }
   }
 

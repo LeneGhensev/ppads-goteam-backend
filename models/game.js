@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   game.init(
     {
-      nome: DataTypes.STRING,
+      nome: { type: DataTypes.STRING, unique: true },
       url_acesso: DataTypes.STRING,
       url_video: DataTypes.STRING,
       descricao: DataTypes.TEXT,
