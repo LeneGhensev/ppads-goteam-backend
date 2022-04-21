@@ -101,7 +101,7 @@ class GameController {
       var tags = game.tags;
 
       if (tags) {
-        tags = JSON.parse(tags);
+        //tags = JSON.parse(tags);
         tags = tags.map(async (tag) => {
           tag = await database.tag.findOrCreate({
             where: { nome: tag },
@@ -216,7 +216,7 @@ class GameController {
       await database.GameTags.destroy({ where: { id_game: Number(id) } });
 
       if (tags) {
-        tags = JSON.parse(tags);
+        //tags = JSON.parse(tags);
         tags = tags.map(async (tag) => {
           tag = await database.tag.findOrCreate({
             where: { nome: tag },
