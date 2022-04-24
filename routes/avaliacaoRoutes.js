@@ -4,7 +4,8 @@ const AvaliacaoController = require('../controllers/AvaliacaoController');
 const router = Router();
 
 router
-    .get('/avaliacaos', AvaliacaoController.findAllAvaliacoes)
+    .get('/avaliacoes', AvaliacaoController.findAllAvaliacoes)
+    .get('/avaliacoes/game/id/:id', AvaliacaoController.findAllAvaliacoesByGameId)
     .get('/avaliacao/id/:id', AvaliacaoController.findOneAvaliacao)
     .post("/avaliacao", AvaliacaoController.createAvaliacao)
     .put('/avaliacao/id/:id', AvaliacaoController.updateAvaliacao)
