@@ -5,6 +5,7 @@ const authentication = require("./authenticationRoutes");
 const categoria = require("./categoriaRoutes")
 const file = require("./fileRoutes")
 const game = require("./gameRoutes")
+const avaliacao = require("./avaliacaoRoutes")
 
 module.exports = (app) => {
   app.use(
@@ -15,6 +16,7 @@ module.exports = (app) => {
     authentication,
     categoria,
     file,
-    game
+    game,
+    avaliacao
   );
 };
