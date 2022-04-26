@@ -17,7 +17,8 @@ module.exports = (sequelize, DataTypes) => {
       } )
       avaliacao.belongsTo(models.Usuario, {
         constraints: true,
-        foreignKey: 'id_usuario'
+        foreignKey: 'id_usuario',
+        as: 'usuario'
       })
       avaliacao.hasMany(models.avaliacao_utilparamim, {
         constraints: true,
