@@ -28,11 +28,11 @@ class UsuarioController {
         const usuario = req.body;
         try{
             let senha = usuario.senhaHash;
-            if(Authentication.validaSenhaNova(senha)){
+            //if(Authentication.validaSenhaNova(senha)){
                 usuario.senhaHash = await Authentication.gerarSenhaHash(usuario.senhaHash);
                 const usuarioCreated = await database.Usuario.create(usuario);
                 return res.status(201).json(usuarioCreated);
-            }
+            //}
         }catch(error){
             console.log(error);
             return res.status(500).json(error.message);
