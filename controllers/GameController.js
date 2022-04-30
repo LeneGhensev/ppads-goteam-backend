@@ -271,6 +271,57 @@ class GameController {
       return res.status(500).json(error.message);
     }
   }
+
+  static async recomendaGame(req, res) {
+    const { id } = req.params;
+    try {
+      const gameAnalisado = await database.game.findOne({
+        where: { id: Number(id) },
+        include: [
+          { model: database.categoria, as: "categoria" },
+          { model: database.tag, as: "tags" },
+        ],
+      });
+
+      const listaGames = await database.game.findAll({
+        include: [
+          { model: database.categoria, as: "categoria" },
+          { model: database.tag, as: "tags" },
+        ],
+      });
+
+      const listaRecomendada = listaGames.sort((a, b) => {
+        /*
+        se retorna negativo A primeiro
+        se retorna zero inalterado
+        se retorna positivo B primeiro
+        */
+        let resultado = 0
+
+        if(a.categoria.id == gameAnalisado.categoria.id) resultado--;
+        if(b.categoria.id == gameAnalisado.categoria.id) resultado++
+
+        gameAnalisado.tags.forEach((tagAnalisada) => {
+          a.tags.forEach((tag) => {
+            if(tagAnalisada.id == tag.id) resultado--;
+          })
+        })
+
+        gameAnalisado.tags.forEach((tagAnalisada) => {
+          b.tags.forEach((tag) => {
+            if(tagAnalisada.id == tag.id) resultado++;
+          })
+        })
+
+        return resultado;
+      });
+
+      return res.status(200).json(listaRecomendada);
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json(error.message);
+    }
+  }
 }
 
 module.exports = GameController;
