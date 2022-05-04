@@ -22,6 +22,9 @@ class AvaliacaoController {
           attributes: { exclude: ["senha", "admin"] },
           as: "usuario",
         },
+        order: [
+          ['updatedAt', 'DESC'],
+        ],
         attributes: { exclude: ["id_usuario", "id_game"] },
       });
 

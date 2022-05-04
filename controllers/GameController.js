@@ -10,6 +10,7 @@ class GameController {
           { model: database.categoria, as: "categoria" },
           { model: database.tag, as: "tags" },
         ],
+        order: [["nome", "ASC"]],
         //attributes: { exclude: ["id_categoria"] },
       });
 
@@ -28,8 +29,14 @@ class GameController {
         include: [
           { model: database.categoria, as: "categoria" },
           { model: database.tag, as: "tags" },
+          { model: database.avaliacao, as: "avaliacao", attributes: [] },
         ],
-        //attributes: { exclude: ["id_categoria"] },
+        attributes: {
+          exclude: ["id_categoria"],
+          include: [
+            [database.sequelize.fn("AVG", database.sequelize.col("avaliacao.estrela")), "estrelas"],
+          ],
+        },
       });
 
       return res.status(200).json(game);
@@ -296,22 +303,22 @@ class GameController {
         se retorna zero inalterado
         se retorna positivo B primeiro
         */
-        let resultado = 0
+        let resultado = 0;
 
-        if(a.categoria.id == gameAnalisado.categoria.id) resultado--;
-        if(b.categoria.id == gameAnalisado.categoria.id) resultado++
+        if (a.categoria.id == gameAnalisado.categoria.id) resultado--;
+        if (b.categoria.id == gameAnalisado.categoria.id) resultado++;
 
         gameAnalisado.tags.forEach((tagAnalisada) => {
           a.tags.forEach((tag) => {
-            if(tagAnalisada.id == tag.id) resultado--;
-          })
-        })
+            if (tagAnalisada.id == tag.id) resultado--;
+          });
+        });
 
         gameAnalisado.tags.forEach((tagAnalisada) => {
           b.tags.forEach((tag) => {
-            if(tagAnalisada.id == tag.id) resultado++;
-          })
-        })
+            if (tagAnalisada.id == tag.id) resultado++;
+          });
+        });
 
         return resultado;
       });
