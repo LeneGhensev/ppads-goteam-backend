@@ -41,9 +41,10 @@ class Authentication {
     const { email, senha } = req.body;
     const usuario = await database.Usuario.findOne({ where: { email: email } });
     const id = usuario.id;
-    const verificaSenha = await bcrypt.compare(senha, usuario.senhaHash);
+    const verificaSenha = await bcrypt.compare(senha, usuario.senha);
+
     if (verificaSenha) {
-      const token = jwt.sign({ id }, process.env.SECRET, {
+      const token = jwt.sign({ id }, process.env.CHAVE_JWT, {
         expiresIn: 300, // expires in 5min
       });
       return res.json({ auth: true, token: token });
@@ -58,7 +59,7 @@ class Authentication {
         .status(401)
         .json({ auth: false, message: "No token provided." });
 
-    jwt.verify(token, process.env.SECRET, function (err, decoded) {
+    jwt.verify(token, process.env.CHAVE_JWT, function (err, decoded) {
       if (err)
         return res
           .status(500)
@@ -68,8 +69,6 @@ class Authentication {
       req.userId = decoded.id;
       next();
     });
-
-
   }
 }
 
