@@ -27,8 +27,8 @@ class UsuarioController {
     static async createUsuario(req, res){
         const usuario = req.body;
         try{
-            let senha = usuario.senhaHash;
-            //if(Authentication.validaSenhaNova(senha)){
+            if(usuario.senha){usuario.senhaHash = usuario.senha}
+            //if(Authentication.validaSenhaNova(usuario.senhaHash)){
                 usuario.senhaHash = await Authentication.gerarSenhaHash(usuario.senhaHash);
                 const usuarioCreated = await database.Usuario.create(usuario);
                 return res.status(201).json(usuarioCreated);
@@ -42,17 +42,20 @@ class UsuarioController {
     static async updateUsuario(req, res) {
         const { id } = req.params;
         let usuario = req.body;
-        delete usuario.id;
+        if(usuario.senha){usuario.senhaHash = usuario.senha}
         let senha = usuario.senhaHash;
+
         delete usuario.senhaHash;
+        delete usuario.id;
+
         try{
             if(senha){
-                if(Authentication.validaSenhaNova(senha)){
+                //if(Authentication.validaSenhaNova(senha)){
                     usuario.senhaHash = await Authentication.gerarSenhaHash(senha);
                     await database.Usuario.update(usuario, {where:{ id: Number(id) }});
                     const usuarioUpdated = await database.Usuario.findOne({where:{ id: Number(id) }});
                     return res.status(202).json(usuarioUpdated);
-                }
+                //}
             }
             await database.Usuario.update(usuario, {where:{ id: Number(id) }});
             const usuarioUpdated = await database.Usuario.findOne({where:{ id: Number(id) }});
