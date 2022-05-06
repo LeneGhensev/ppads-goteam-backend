@@ -1,5 +1,6 @@
 const database = require("../models");
 const Authentication = require("../security/authentication");
+const jwt = require("jsonwebtoken");
 
 class UsuarioController {
   static async findAllUsuarios(req, res) {
@@ -23,6 +24,29 @@ class UsuarioController {
       console.log(error);
       return res.status(500).json(error.message);
     }
+  }
+
+  static async findUsuarioByToken(req, res) {
+    const token = req.headers["x-access-token"];
+
+    jwt.verify(token, process.env.CHAVE_JWT, async function (err, decoded) {
+      if (err)
+        return res
+          .status(500)
+          .json({ auth: false, message: "Failed to authenticate token." });
+
+      const id = decoded.id;
+
+      try {
+        const usuario = await database.Usuario.findOne({
+          where: { id: Number(id) },
+        });
+        return res.status(200).json(usuario);
+      } catch (error) {
+        console.log(error);
+        return res.status(500).json(error.message);
+      }
+    });
   }
 
   static async createUsuario(req, res) {

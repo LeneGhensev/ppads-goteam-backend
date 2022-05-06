@@ -7,6 +7,7 @@ const router = Router();
 router
   .get("/usuarios", Authentication.verifyJWT, UsuarioController.findAllUsuarios)
   .get("/usuario/id/:id", UsuarioController.findOneUsuario)
+  .get("/usuario", UsuarioController.findUsuarioByToken)
   .post("/usuario", UsuarioController.createUsuario)
   .put("/usuario/id/:id", UsuarioController.updateUsuario)
   .delete("/usuario/id/:id", UsuarioController.destroyUsuario);
