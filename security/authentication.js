@@ -45,7 +45,7 @@ class Authentication {
 
     if (verificaSenha) {
       const token = jwt.sign({ id }, process.env.CHAVE_JWT, {
-        expiresIn: 300, // expires in 5min
+        expiresIn: 1800, // expires in 5min
       });
       return res.json({ auth: true, token: token });
     }
@@ -57,18 +57,38 @@ class Authentication {
     if (!token)
       return res
         .status(401)
-        .json({ auth: false, message: "No token provided." });
+        .json({ auth: false, message: "Token não fornecido." });
 
     jwt.verify(token, process.env.CHAVE_JWT, function (err, decoded) {
       if (err)
         return res
           .status(500)
-          .json({ auth: false, message: "Failed to authenticate token." });
+          .json({ auth: false, message: "Falha em autenticar token." });
 
       // se tudo estiver ok, salva no request para uso posterior
       req.userId = decoded.id;
       next();
     });
+  }
+
+  static async verifyAdmin(req, res, next){
+    const id = req.userId;
+
+    try {
+      const usuario = await database.Usuario.findOne({
+        where: { id: Number(id) },
+        attributes: { 
+          exclude: ["senha"]
+        },
+      });
+      if(usuario.admin) {next()}else{
+        res.status(401).json("Usuário não autorizado.")
+      };
+
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json(error.message);
+    }
   }
 }
 

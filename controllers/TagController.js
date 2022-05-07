@@ -32,6 +32,6 @@ class TagController {
             return res.status(500).json(error.message);
         }
     }
-
-
 }
+
+module.exports = TagController;
