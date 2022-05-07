@@ -69,6 +69,7 @@ class UsuarioController {
     let usuario = req.body;
 
     delete usuario.id;
+    delete usuario.admin;
 
     try {
       if (usuario.senha) {
@@ -101,6 +102,19 @@ class UsuarioController {
       console.log(error);
       return res.status(500).json(error.message);
     }
+  }
+
+  static async makeUsuarioAdmin(req, res) {
+    const { id } = req.params;
+    const usuario = {admin: true};
+
+    try{
+      await database.Usuario.update(usuario, { where: { id: Number(id) } });
+      return res.status(202)
+    }catch (error) {
+      return res.status(500).json(error.message);
+    }
+
   }
 }
 

@@ -323,6 +323,8 @@ class GameController {
         return resultado;
       });
 
+      listaRecomendada = listaRecomendada.slice(0,5)
+
       return res.status(200).json(listaRecomendada);
     } catch (error) {
       console.log(error);

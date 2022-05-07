@@ -81,7 +81,7 @@ class Authentication {
           exclude: ["senha"]
         },
       });
-      if(usuario.admin) {next()}else{
+      if(usuario.admin===true) {next()}else{
         res.status(401).json("Usuário não autorizado.")
       };
 
