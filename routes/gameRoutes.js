@@ -5,7 +5,7 @@ const Authentication = require("../security/authentication");
 const router = Router();
 
 router
-  .get("/games", Authentication.verifyJWT, GameController.findAllGames)
+  .get("/games", GameController.findAllGames)
   .get("/game/id/:id", GameController.findOneGame)
   .get("/game/recomenda/id/:id", GameController.recomendaGame)
   .post("/game", GameController.createGame)
