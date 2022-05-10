@@ -52,12 +52,12 @@ class UsuarioController {
   static async createUsuario(req, res) {
     const usuario = req.body;
     try {
-      // if(usuario.senha){usuario.senhaHash = usuario.senha}
-      //if(Authentication.validaSenhaNova(usuario.senhaHash)){
+      if(Authentication.validaSenhaNova(usuario.senha)){
       usuario.senha = await Authentication.gerarSenhaHash(usuario.senha);
-      const usuarioCreated = await database.Usuario.create(usuario);
+      let usuarioCreated = await database.Usuario.create(usuario);
+      delete usuarioCreated.senha;
       return res.status(201).json(usuarioCreated);
-      //}
+      }
     } catch (error) {
       console.log(error);
       return res.status(500).json(error.message);
@@ -67,24 +67,22 @@ class UsuarioController {
   static async updateUsuario(req, res) {
     const { id } = req.params;
     let usuario = req.body;
-    if (usuario.senha) {
-      usuario.senhaHash = usuario.senha;
-    }
-    let senha = usuario.senhaHash;
+    
+    let senha = usuario.senha;
 
-    delete usuario.senhaHash;
+    delete usuario.senha;
     delete usuario.id;
 
     try {
       if (senha) {
-        //if(Authentication.validaSenhaNova(senha)){
+        if(Authentication.validaSenhaNova(senha)){
         usuario.senhaHash = await Authentication.gerarSenhaHash(senha);
         await database.Usuario.update(usuario, { where: { id: Number(id) } });
         const usuarioUpdated = await database.Usuario.findOne({
           where: { id: Number(id) },
         });
         return res.status(202).json(usuarioUpdated);
-        //}
+        }
       }
       await database.Usuario.update(usuario, { where: { id: Number(id) } });
       const usuarioUpdated = await database.Usuario.findOne({
