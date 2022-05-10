@@ -5,7 +5,10 @@ const jwt = require("jsonwebtoken");
 class UsuarioController {
   static async findAllUsuarios(req, res) {
     try {
-      const usuarios = await database.Usuario.findAll();
+      const usuarios = await database.Usuario.findAll({
+        attributes: { 
+          exclude: ["senha"]
+        }});
       return res.status(200).json(usuarios);
     } catch (error) {
       console.log(error);
@@ -18,6 +21,9 @@ class UsuarioController {
     try {
       const usuario = await database.Usuario.findOne({
         where: { id: Number(id) },
+        attributes: { 
+          exclude: ["senha"]
+        },
       });
       return res.status(200).json(usuario);
     } catch (error) {
@@ -27,31 +33,27 @@ class UsuarioController {
   }
 
   static async findUsuarioByToken(req, res) {
-    const token = req.headers["x-access-token"];
+    const id = req.userId;
 
-    jwt.verify(token, process.env.CHAVE_JWT, async function (err, decoded) {
-      if (err)
-        return res
-          .status(500)
-          .json({ auth: false, message: "Failed to authenticate token." });
-
-      const id = decoded.id;
-
-      try {
-        const usuario = await database.Usuario.findOne({
-          where: { id: Number(id) },
-        });
-        return res.status(200).json(usuario);
-      } catch (error) {
-        console.log(error);
-        return res.status(500).json(error.message);
-      }
-    });
+    try {
+      const usuario = await database.Usuario.findOne({
+        where: { id: Number(id) },
+        attributes: { 
+          exclude: ["senha"]
+        },
+      });
+      return res.status(200).json(usuario);
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json(error.message);
+    }
   }
 
   static async createUsuario(req, res) {
     const usuario = req.body;
+    delete usuario.admin;
     try {
+
       if(Authentication.validaSenhaNova(usuario.senha)){
       usuario.senha = await Authentication.gerarSenhaHash(usuario.senha);
       let usuarioCreated = await database.Usuario.create(usuario);
@@ -67,16 +69,16 @@ class UsuarioController {
   static async updateUsuario(req, res) {
     const { id } = req.params;
     let usuario = req.body;
-    
-    let senha = usuario.senha;
 
-    delete usuario.senha;
+
     delete usuario.id;
+    delete usuario.admin;
 
     try {
-      if (senha) {
-        if(Authentication.validaSenhaNova(senha)){
-        usuario.senhaHash = await Authentication.gerarSenhaHash(senha);
+
+      if (usuario.senha) {
+        if(Authentication.validaSenhaNova(usuario.senha)){
+        usuario.senha = await Authentication.gerarSenhaHash(usuario.senha);
         await database.Usuario.update(usuario, { where: { id: Number(id) } });
         const usuarioUpdated = await database.Usuario.findOne({
           where: { id: Number(id) },
@@ -104,6 +106,19 @@ class UsuarioController {
       console.log(error);
       return res.status(500).json(error.message);
     }
+  }
+
+  static async makeUsuarioAdmin(req, res) {
+    const { id } = req.params;
+    const usuario = {admin: true};
+
+    try{
+      await database.Usuario.update(usuario, { where: { id: Number(id) } });
+      return res.status(202)
+    }catch (error) {
+      return res.status(500).json(error.message);
+    }
+
   }
 }
 

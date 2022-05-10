@@ -5,11 +5,11 @@ const Authentication = require("../security/authentication");
 const router = Router();
 
 router
-  .get("/usuarios", Authentication.verifyJWT, UsuarioController.findAllUsuarios)
-  .get("/usuario/id/:id", UsuarioController.findOneUsuario)
-  .get("/usuario", UsuarioController.findUsuarioByToken)
+  .get("/usuarios", Authentication.verifyJWT, Authentication.verifyAdmin, UsuarioController.findAllUsuarios)
+  .get("/usuario/id/:id", Authentication.verifyJWT, Authentication.verifyAdmin, UsuarioController.findOneUsuario)
+  .get("/usuario", Authentication.verifyJWT, UsuarioController.findUsuarioByToken)
   .post("/usuario", UsuarioController.createUsuario)
-  .put("/usuario/id/:id", UsuarioController.updateUsuario)
-  .delete("/usuario/id/:id", UsuarioController.destroyUsuario);
+  .put("/usuario/id/:id", Authentication.verifyJWT, UsuarioController.updateUsuario)
+  .delete("/usuario/id/:id", Authentication.verifyJWT, UsuarioController.destroyUsuario);
 
 module.exports = router;
