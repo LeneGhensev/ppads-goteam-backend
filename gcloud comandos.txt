@@ -1,0 +1,5 @@
+Deploy
+  $ gcloud app deploy
+
+You can stream logs from the command line by running:
+  $ gcloud app logs tail -s default

@@ -53,9 +53,11 @@ class UsuarioController {
     const usuario = req.body;
     delete usuario.admin;
     try {
-      if(Authentication.validaSenhaNova(usuario.senhaHash)){
+
+      if(Authentication.validaSenhaNova(usuario.senha)){
       usuario.senha = await Authentication.gerarSenhaHash(usuario.senha);
-      const usuarioCreated = await database.Usuario.create(usuario);
+      let usuarioCreated = await database.Usuario.create(usuario);
+      delete usuarioCreated.senha;
       return res.status(201).json(usuarioCreated);
       }
     } catch (error) {
@@ -68,10 +70,12 @@ class UsuarioController {
     const { id } = req.params;
     let usuario = req.body;
 
+
     delete usuario.id;
     delete usuario.admin;
 
     try {
+
       if (usuario.senha) {
         if(Authentication.validaSenhaNova(usuario.senha)){
         usuario.senha = await Authentication.gerarSenhaHash(usuario.senha);
