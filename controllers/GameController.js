@@ -297,7 +297,7 @@ class GameController {
         ],
       });
 
-      const listaRecomendada = listaGames.sort((a, b) => {
+      let listaRecomendada = listaGames.sort((a, b) => {
         /*
         se retorna negativo A primeiro
         se retorna zero inalterado
