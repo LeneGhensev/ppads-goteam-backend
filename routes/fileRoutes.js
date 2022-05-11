@@ -5,6 +5,6 @@ const Authentication = require("../security/authentication");
 const router = Router();
 
 router
-    .post("/file", Authentication.verifyJWT, Authentication.verifyAdmin, FileController.createFile)
+    .post("/file", FileController.createFile)
 
 module.exports = router;

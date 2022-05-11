@@ -27,8 +27,8 @@ class GameController {
       let game = await database.game.findOne({
         where: { id: Number(id) },
         include: [
-          { model: database.categoria, as: "categoria" },
           { model: database.tag, as: "tags" },
+          { model: database.categoria, as: "categoria" },
           { model: database.avaliacao, as: "avaliacao", attributes: [] },
         ],
         attributes: {
