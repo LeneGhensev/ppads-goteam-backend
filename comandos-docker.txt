@@ -1,0 +1,36 @@
+$ docker run -d [nome ou id]
+Executa container
+-p [host]:[conteiner]
+mapeia portas
+-v [host]:[conteiner]
+mapeia volume
+--name [nome]
+nomeia o conteiner
+--network [nome]
+define a rede bridge
+
+$ docker ps
+Exibe containers em execução
+
+$ docker ps -a
+Exibe historico containers em execução
+
+$ docker stop [nome ou id]
+Para o container
+
+$ docker exec -it (iterativo) [nome ou id] [comando]
+Executa comando no container - Control D sai do container
+
+$ docker pause/unpause [nome ou id]
+Pausa o container
+
+$ docker port [nome ou id]
+Mostra as portas do container
+
+$ docker build -t [usuario]/[nome ou id]:[versao] .
+Constroi a imagem
+
+$ docker login -u [usuario]
+Fazer login no repositorio
+
+$ docker network create --driver bridge [nome]
